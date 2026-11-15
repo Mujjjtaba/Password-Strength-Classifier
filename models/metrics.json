@@ -5,8 +5,6 @@
         "precision": 88.06,
         "recall": 81.05,
         "f1_score": 82.95,
-        "macro_precision": 78.66,
-        "macro_recall": 78.57,
         "macro_f1_score": 78.57
     },
     "xgboost": {
@@ -15,8 +13,6 @@
         "precision": 96.38,
         "recall": 95.81,
         "f1_score": 95.93,
-        "macro_precision": 94.24,
-        "macro_recall": 94.15,
         "macro_f1_score": 94.15
     },
     "naive_bayes": {
@@ -25,8 +21,6 @@
         "precision": 78.67,
         "recall": 60.86,
         "f1_score": 65.94,
-        "macro_precision": 62.62,
-        "macro_recall": 61.72,
         "macro_f1_score": 61.72
     }
 }
