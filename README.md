@@ -2,6 +2,8 @@
 
 A Streamlit application that uses machine learning to classify passwords into **Weak**, **Moderate**, and **Strong** categories.
 
+> **Live app:** [https://mujjjtaba-password-strength-classification-app-hrvln6.streamlit.app/](https://mujjjtaba-password-strength-classification-app-hrvln6.streamlit.app/)
+
 [![Python](https://img.shields.io/badge/Python-3.10%2B-blue)](https://www.python.org/)
 [![Streamlit](https://img.shields.io/badge/App-Streamlit-FF4B4B)](https://streamlit.io/)
 [![Scikit-learn](https://img.shields.io/badge/ML-scikit--learn-orange)](https://scikit-learn.org/)
