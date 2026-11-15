@@ -1,211 +1,151 @@
-# 🔐 Password Strength Classifier ML App
+# Password Strength Classifier
 
-<div align="center">
+A Streamlit application that uses machine learning to classify passwords into **Weak**, **Moderate**, and **Strong** categories.
 
-![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white)
-![Streamlit](https://img.shields.io/badge/Streamlit-Deployed-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)
-![XGBoost](https://img.shields.io/badge/XGBoost-98.85%25_Accuracy-189AB4?style=for-the-badge)
-![Scikit-learn](https://img.shields.io/badge/Scikit--learn-ML-F7931E?style=for-the-badge&logo=scikit-learn&logoColor=white)
-![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
+[![Python](https://img.shields.io/badge/Python-3.10%2B-blue)](https://www.python.org/)
+[![Streamlit](https://img.shields.io/badge/App-Streamlit-FF4B4B)](https://streamlit.io/)
+[![Scikit-learn](https://img.shields.io/badge/ML-scikit--learn-orange)](https://scikit-learn.org/)
+[![XGBoost](https://img.shields.io/badge/Model-XGBoost-189AB4)](https://xgboost.readthedocs.io/)
 
-**A full-stack ML-powered web application that classifies any password as Weak, Moderate, or Strong — trained on a balanced dataset using character-level TF-IDF vectorization and 3 competing models.**
+## Overview
 
-[🌐 Live App](https://mujjjtaba-password-strength-classification-app-hrvln6.streamlit.app/) · [📄 Project Report](https://drive.google.com/drive/folders/1FVaqAgvUkd-wUiAzFODG6szq7dO685OA?usp=sharing) · [🔗 LinkedIn](https://www.linkedin.com/in/mujtaba11)
+The project compares three supervised machine-learning models:
 
-</div>
+- Logistic Regression
+- XGBoost
+- Multinomial Naive Bayes
 
----
+Passwords are represented using **character-level TF-IDF**. The training pipeline uses a stratified 80:20 train-test split. The vectorizer is fitted only on the training partition, and class balancing is applied only during model fitting. The held-out test partition is not upsampled or resampled.
 
-## ✨ What This App Does
+The application rejects whitespace characters in entered passwords. Its password generator uses Python's `secrets` module.
 
-Enter any password → select a model → get an instant **Weak / Moderate / Strong** classification with full model performance metrics, confusion matrices, and comparative visualizations — all inside a clean Streamlit interface.
+## Latest evaluation
 
-> Built as part of the **Summer Internship / Training Project** at Lovely Professional University  
-> Course: *Machine Learning Made Easy: From Basics to AI Applications*  
-> Student: **Mujtaba Kamal** · Reg. No: 12319576 · June–July 2025
+These results are from the corrected training run on the whitespace-filtered dataset (November 15, 2026).
 
----
+| Model | Accuracy | Weighted precision | Weighted recall | Weighted F1 | Macro F1 | Training time |
+|---|---:|---:|---:|---:|---:|---:|
+| **XGBoost** | **95.81%** | **96.38%** | **95.81%** | **95.93%** | **94.15%** | 9.38 s |
+| Logistic Regression | 81.05% | 88.06% | 81.05% | 82.95% | 78.57% | 8.04 s |
+| Multinomial Naive Bayes | 60.86% | 78.67% | 60.86% | 65.94% | 61.72% | 0.10 s |
 
-## 🚀 Live Demo
+**Important:** These are measured results for this dataset and this particular split. They are not a guarantee that a password is secure, and they should not be interpreted as real-world attack resistance.
 
-🌐 **[Try the App →](https://mujjjtaba-password-strength-classification-app-hrvln6.streamlit.app/)**
+### Evaluation dataset
 
-App features available live:
-- 🔍 Classify any password with your choice of model
-- 🔐 Generate cryptographically strong random passwords
-- 📊 View confusion matrices for all 3 models
-- 📈 Compare training time, accuracy, precision, recall & F1-score
-- 💡 Read project insights and model selection rationale
+| Item | Count |
+|---|---:|
+| Original rows | 669,640 |
+| Rows removed because password contained whitespace | 851 |
+| Rows after cleaning | 668,788 |
+| Training rows (80%) | 535,030 |
+| Test rows (20%) | 133,758 |
 
----
+Class labels: `0 = Weak`, `1 = Moderate`, `2 = Strong`.
 
-## 🏆 Model Performance
+## How the pipeline works
 
-| Model | Accuracy | Precision | Recall | F1-Score | Training Time |
-|-------|----------|-----------|--------|----------|---------------|
-| 🥇 **XGBoost** | **98.85%** | **98.86%** | **98.85%** | **98.85%** | 11.35s |
-| 🥈 **Logistic Regression** | 80.34% | 80.17% | 80.34% | 80.20% | 14.72s |
-| 🥉 **Naive Bayes** | 58.87% | 58.42% | 58.87% | 58.47% | 0.17s |
+1. Load the labeled CSV dataset.
+2. Remove rows with missing labels, empty passwords, unsupported labels, and passwords containing whitespace.
+3. Split the data into stratified training and test partitions (80:20).
+4. Fit character-level TF-IDF on the training passwords only.
+5. Transform the test passwords using the already-fitted vectorizer.
+6. Calculate balanced sample weights from the training labels.
+7. Train Logistic Regression with `class_weight="balanced"`, and train XGBoost and Multinomial Naive Bayes with balanced sample weights.
+8. Evaluate each model on the same untouched test partition.
+9. Save models, vectorizer, metrics, classification reports, confusion matrices, and test data.
 
-> **XGBoost dominates** — nearly 99% accuracy with strong generalization across all three password strength classes.
+## Application features
 
----
+- Password strength prediction with a selectable model
+- Whitespace validation (spaces, tabs, newlines and other whitespace are rejected)
+- Password input masking
+- Secure random password generation with `secrets`
+- Confusion matrices and classification reports on the saved test set
+- Model comparison and extended weighted/macro metrics
 
-## 🧠 How It Works
+## Project structure
 
-```
-User Input Password
-        │
-        ▼
-Character-Level Tokenizer
-        │
-        ▼
-TF-IDF Vectorizer (char n-grams)
-        │
-        ├──▶ Logistic Regression ──▶ Weak / Moderate / Strong
-        ├──▶ XGBoost Classifier  ──▶ Weak / Moderate / Strong
-        └──▶ Naive Bayes         ──▶ Weak / Moderate / Strong
-```
-
-**Why character-level TF-IDF?** Passwords don't have "words" — they have character patterns. This approach captures entropy, repetition, special character usage, and structural complexity at the character level, which directly determines password strength.
-
----
-
-## 📊 App Sections
-
-| Section | Description |
-|---------|-------------|
-| 🔍 **Classify Password** | Enter any password, select a model, get instant strength prediction |
-| 🔐 **Generate Password** | Slider-based strong password generator (8–24 chars) |
-| 📊 **Model Evaluation** | Live confusion matrices for all 3 models on test data |
-| 📈 **Model Comparison** | Bar charts: accuracy & training time side-by-side |
-| 📉 **Extended Metrics** | Precision, Recall, F1-Score visualized per model |
-| 💡 **Insights** | Model selection rationale and key project takeaways |
-
----
-
-## 🗂️ Project Structure
-
-```
+```text
 Password-Strength-Classifier/
-│
-├── 📄 app.py                        # Streamlit app — UI, prediction, visualization
-├── 📄 train_and_save_models.py      # Full training pipeline
-├── 📄 requirements.txt              # Python dependencies
-├── 📄 SummerInternship.pdf          # Full academic project report
-│
-├── 📁 models/
-│   ├── logistic_regression.pkl      # Trained Logistic Regression model
-│   ├── xgboost.pkl                  # Trained XGBoost model (98.85% accuracy)
-│   ├── naive_bayes.pkl              # Trained Naive Bayes model
-│   ├── tfidf.pkl                    # Fitted TF-IDF vectorizer
-│   └── metrics.json                 # All model metrics (accuracy, F1, time, etc.)
-│
-└── 📁 data/
-    └── data.csv                     # Labeled password dataset (Weak/Moderate/Strong)
+├── app.py
+├── train_and_save_models.py
+├── requirements.txt
+├── README.md
+├── data/
+│   └── data.csv
+└── models/
+    ├── logistic_regression.pkl
+    ├── xgboost.pkl
+    ├── naive_bayes.pkl
+    ├── tfidf.pkl
+    ├── metrics.json
+    ├── classification_reports.json
+    ├── test_data.pkl
+    └── *_confusion_matrix.npy
 ```
 
----
+Generated model artifacts are created by the training script and should be kept in sync with the code and metrics. Do not mix model files from an older training run with newly generated metrics or test data.
 
-## ⚙️ Getting Started (Run Locally)
+## Run locally
 
-### 1. Clone the repo
+### 1. Clone the repository
+
 ```bash
 git clone https://github.com/Mujjjtaba/Password-Strength-Classifier.git
 cd Password-Strength-Classifier
 ```
 
-### 2. Create virtual environment & install dependencies
+### 2. Create and activate a virtual environment
+
+Windows PowerShell:
+
+```powershell
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+```
+
+macOS/Linux:
+
 ```bash
 python -m venv .venv
-.venv\Scripts\activate        # Windows
-# source .venv/bin/activate   # macOS/Linux
+source .venv/bin/activate
+```
 
+### 3. Install dependencies
+
+```bash
 pip install -r requirements.txt
 ```
 
-### 3. (Optional) Retrain models
+### 4. Train the models
+
 ```bash
 python train_and_save_models.py
 ```
 
-### 4. Launch the app
+The script reads `data/data.csv` (and also supports a root-level `data.csv`), then writes all generated artifacts to `models/`.
+
+### 5. Launch Streamlit
+
 ```bash
 streamlit run app.py
 ```
 
-Then open → **`http://localhost:8501`**
+Open the local URL printed by Streamlit (usually `http://localhost:8501`).
 
----
+## Notes on security and limitations
 
-## 📦 Dependencies
+- The classifier is a machine-learning demonstration, not a password-policy engine or a password-auditing service.
+- Passwords entered in the app are processed for local model inference by the Streamlit application. Do not enter passwords that you actually use for important accounts into a demonstration app.
+- The generator uses the operating system-backed randomness exposed by Python's `secrets` module.
+- This project applies a no-whitespace rule as an explicit application policy. Some real-world services allow spaces in passphrases; password policies vary.
+- The three models have different performance characteristics. Naive Bayes is retained for comparison even though its measured results are lower on this dataset.
+- Training time depends on hardware, software versions, and system load.
 
-```txt
-streamlit
-pandas
-scikit-learn
-xgboost
-seaborn
-matplotlib
-joblib
-```
-
----
-
-## 🔬 ML Pipeline Details
-
-| Step | Details |
-|------|---------|
-| **Dataset** | CSV with passwords labeled 0 (Weak), 1 (Moderate), 2 (Strong) |
-| **Balancing** | Upsampling minority classes to match majority class size |
-| **Tokenization** | Character-level (not word-level) — captures password structure |
-| **Vectorization** | TF-IDF on character tokens — weights rare/unique patterns higher |
-| **Split** | 80% train / 20% test, stratified |
-| **Serialization** | `joblib` for models + vectorizer; `metrics.json` for results |
-| **Deployment** | Streamlit Cloud with `@st.cache_data` for performance |
-
----
-
-## 🔮 Future Scope
-
-- [ ] Deep learning (LSTM/RNN) for sequence-aware password modeling
-- [ ] Real-time feedback: "Add a special character to strengthen this password"
-- [ ] Leaked password database integration (HaveIBeenPwned API)
-- [ ] SHAP/LIME explainability for transparent predictions
-- [ ] Chrome extension / mobile SDK for signup form integration
-- [ ] Multilingual password support
-
----
-
-## 📚 References
-
-1. [Password Strength Detection via ML — arXiv](https://arxiv.org/)
-2. [ML-Based Password Strength Estimation — MDPI](https://www.mdpi.com/)
-3. [A Password Strength Classifier Using Supervised ML — ResearchGate](https://www.researchgate.net/)
-4. [Upsampling & Downsampling Imbalanced Data — GeeksForGeeks](https://www.geeksforgeeks.org/)
-5. [Scikit-learn Documentation](https://scikit-learn.org/)
-6. [XGBoost Documentation](https://xgboost.readthedocs.io/)
-
----
-
-## 👤 Author
+## Author
 
 **Mujtaba Kamal**  
-B.Tech CSE · Lovely Professional University · Reg. No: 12319576  
-Summer Internship — Centre for Professional Enhancement · Certificate ID: 407935
+B.Tech CSE, Lovely Professional University
 
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-0077B5?style=flat&logo=linkedin)](https://www.linkedin.com/in/mujtaba11)
-[![GitHub](https://img.shields.io/badge/GitHub-Follow-181717?style=flat&logo=github)](https://github.com/Mujjjtaba)
-[![Live App](https://img.shields.io/badge/Streamlit-Live_App-FF4B4B?style=flat&logo=streamlit)](https://mujjjtaba-password-strength-classification-app-hrvln6.streamlit.app/)
-
----
-
-## 📄 License
-
-Licensed under the **MIT License** — free to use, modify, and distribute with attribution.
-
----
-
-<div align="center">
-  <sub>Built with Python, Streamlit & ❤️ · Lovely Professional University · Summer 2025</sub>
-</div>
+[GitHub](https://github.com/Mujjjtaba) · [LinkedIn](https://www.linkedin.com/in/mujtaba11) · [Live Streamlit app](https://mujjjtaba-password-strength-classification-app-hrvln6.streamlit.app/)
